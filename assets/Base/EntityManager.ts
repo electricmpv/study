@@ -1,6 +1,6 @@
 import { _decorator, Component, Sprite, UITransform } from 'cc'
 
-import { TILE_HEIGHT, TILE_WIDTH } from 'db://assets/Scripts/Scene/Tile/TileManager'
+import { TILE_HEIGHT, TILE_WIDTH } from 'db://assets/Scripts/Tile/TileManager'
 
 import {
   DIRECTION_ENUM,
@@ -12,6 +12,7 @@ import {
 
 import { PlayerStateMachine } from 'db://assets/Scripts/Player/PlayerStateMachine'
 import { IEntity } from 'db://assets/Levels'
+import { StateMachine } from 'db://assets/Base/StateMachine'
 
 const { ccclass, property } = _decorator
 
@@ -20,7 +21,7 @@ export class EntityManager extends Component {
   x: number = 0
   y: number = 0
 
-  fsm: PlayerStateMachine
+  fsm: StateMachine
 
   private _direction: DIRECTION_ENUM
   private _state: ENTITY_STATE_ENUM

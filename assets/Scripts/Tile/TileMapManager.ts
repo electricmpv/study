@@ -1,7 +1,7 @@
 import { _decorator, Component, SpriteFrame } from 'cc'
 const { ccclass, property } = _decorator
 
-import { TileManager } from 'db://assets/Scripts/Scene/Tile/TileManager'
+import { TileManager } from 'db://assets/Scripts/Tile/TileManager'
 import { createUINode, randomByRange } from 'db://assets/Utils'
 import DateManager from 'db://assets/Runtime/DateManager'
 import ResourceManager from 'db://assets/Runtime/ResourceManager'
