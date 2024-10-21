@@ -5,9 +5,11 @@ import Levels, { ILevel } from 'db://assets/Levels'
 import DateManager from 'db://assets/Runtime/DateManager'
 import { TILE_HEIGHT, TILE_WIDTH } from 'db://assets/Scripts/Tile/TileManager'
 import EventManager from 'db://assets/Runtime/EventManager'
-import { EVENT_ENUM } from 'db://assets/Enums'
+import { DIRECTION_ENUM, ENTITY_STATE_ENUM, ENTITY_TYPE_ENUM, EVENT_ENUM } from 'db://assets/Enums'
 import { PlayerManager } from 'db://assets/Scripts/Player/PlayerManager'
 import { WoodenSkeletonManager } from 'db://assets/Scripts/WoodenSkeleton/WoodenSkeletonManager'
+import { DoorManager } from 'db://assets/Scripts/Door/DoorManager'
+import { IronSkeletonManager } from 'db://assets/Scripts/IronSkeleton/IronSkeletonManager'
 const { ccclass, property } = _decorator
 
 @ccclass('BattleManager')
@@ -37,6 +39,7 @@ export class BattleManager extends Component {
       DateManager.Instance.mapColumnCount = this.level.mapInfo[0].length || 0
 
       this.generateTileMap()
+      this.generateDoor()
       this.generatePlayer()
       this.generateEnemies()
     }
@@ -69,17 +72,49 @@ export class BattleManager extends Component {
     const player = createUINode()
     player.setParent(this.stage)
     const playerManager = player.addComponent(PlayerManager)
-    await playerManager.init()
+    await playerManager.init({
+      x: 2,
+      y: 8,
+      type: ENTITY_TYPE_ENUM.PLAYER,
+      direction: DIRECTION_ENUM.TOP,
+      state: ENTITY_STATE_ENUM.IDLE,
+    })
     DateManager.Instance.player = playerManager
     EventManager.Instance.emit(EVENT_ENUM.PLAYER_BORN, true)
   }
 
   async generateEnemies() {
-    const enemy = createUINode()
-    enemy.setParent(this.stage)
-    const woodenSkeletonManager = enemy.addComponent(WoodenSkeletonManager)
-    await woodenSkeletonManager.init()
+    const enemy1 = createUINode()
+    enemy1.setParent(this.stage)
+    const woodenSkeletonManager = enemy1.addComponent(WoodenSkeletonManager)
+    await woodenSkeletonManager.init({
+      x: 2,
+      y: 4,
+      type: ENTITY_TYPE_ENUM.SKELETON_WOODEN,
+      direction: DIRECTION_ENUM.TOP,
+      state: ENTITY_STATE_ENUM.IDLE,
+    })
     DateManager.Instance.enemies.push(woodenSkeletonManager)
+
+    const enemy2 = createUINode()
+    enemy2.setParent(this.stage)
+    const ironSkeletonManager = enemy2.addComponent(IronSkeletonManager)
+    await ironSkeletonManager.init({
+      x: 2,
+      y: 2,
+      type: ENTITY_TYPE_ENUM.SKELETON_IRON,
+      direction: DIRECTION_ENUM.TOP,
+      state: ENTITY_STATE_ENUM.IDLE,
+    })
+    DateManager.Instance.enemies.push(ironSkeletonManager)
+  }
+
+  async generateDoor() {
+    const door = createUINode()
+    door.setParent(this.stage)
+    const doorManager = door.addComponent(DoorManager)
+    await doorManager.init()
+    DateManager.Instance.door = doorManager
   }
   adaptPos() {
     const { mapRowCount, mapColumnCount } = DateManager.Instance
