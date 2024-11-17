@@ -114,6 +114,8 @@ const mapInfo = [
     {
       src: 1,
       type: TILE_TYPE_ENUM.FLOOR,
+      /*src: null,
+      type: null,*/
     },
     {
       src: 1,

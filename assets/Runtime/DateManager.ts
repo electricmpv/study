@@ -5,6 +5,8 @@ import { PlayerManager } from 'db://assets/Scripts/Player/PlayerManager'
 import { WoodenSkeletonManager } from 'db://assets/Scripts/WoodenSkeleton/WoodenSkeletonManager'
 import { DoorManager } from 'db://assets/Scripts/Door/DoorManager'
 import { EnemyManager } from 'db://assets/Base/EnemyManager'
+import { BurstManager } from 'db://assets/Scripts/Burst/BurstManager'
+import { SpikesManager } from 'db://assets/Scripts/Spikes/SpikesManager'
 
 export default class DateManager extends Singleton {
   static get Instance() {
@@ -19,12 +21,16 @@ export default class DateManager extends Singleton {
   player: PlayerManager
   door: DoorManager
   enemies: EnemyManager[]
+  bursts: BurstManager[]
+  spikes: SpikesManager[]
   reset() {
     this.mapInfo = []
     this.tileInfo = []
     this.player = null
     this.door = null
     this.enemies = []
+    this.bursts = []
+    this.spikes = []
     this.mapRowCount = 0
     this.mapColumnCount = 0
   }

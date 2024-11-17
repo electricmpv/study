@@ -7,6 +7,7 @@ import { EntityManager } from 'db://assets/Base/EntityManager'
 import DateManager from 'db://assets/Runtime/DateManager'
 import { IEntity } from 'db://assets/Levels'
 import { EnemyManager } from 'db://assets/Base/EnemyManager'
+import { BurstManager } from 'db://assets/Scripts/Burst/BurstManager'
 
 const { ccclass, property } = _decorator
 
@@ -106,8 +107,9 @@ export class PlayerManager extends EntityManager {
       } else if (this.direction === DIRECTION_ENUM.RIGHT) {
         this.direction = DIRECTION_ENUM.TOP
       }
-      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
+
       this.state = ENTITY_STATE_ENUM.TURNLEFT
+      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
     } else if (inputDirection === CONTROLLER_ENUM.TURNRIGHT) {
       if (this.direction === DIRECTION_ENUM.TOP) {
         this.direction = DIRECTION_ENUM.RIGHT
@@ -118,8 +120,9 @@ export class PlayerManager extends EntityManager {
       } else if (this.direction === DIRECTION_ENUM.RIGHT) {
         this.direction = DIRECTION_ENUM.BOTTOM
       }
-      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
+
       this.state = ENTITY_STATE_ENUM.TURNRIGHT
+      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
     }
   }
 
@@ -171,9 +174,9 @@ export class PlayerManager extends EntityManager {
       (enemy: EnemyManager) => enemy.state !== ENTITY_STATE_ENUM.DEATH,
     )
     const { x: doorX, y: doorY, state: doorState } = DateManager.Instance.door || {}
-    /*const bursts: BurstManager[] = DateManager.Instance.bursts.filter(
+    const bursts: BurstManager[] = DateManager.Instance.bursts.filter(
       (burst: BurstManager) => burst.state !== ENTITY_STATE_ENUM.DEATH,
-    )*/
+    )
 
     const { mapRowCount: row, mapColumnCount: column } = DateManager.Instance
 
@@ -214,12 +217,12 @@ export class PlayerManager extends EntityManager {
         }
 
         //判断地裂陷阱
-        /*if (
+        if (
           bursts.some(burst => burst.x === x && burst.y === playerNextY) &&
           (!nextWeaponTile || nextWeaponTile.turnable)
         ) {
           return false
-        }*/
+        }
 
         //最后判断地图元素
         if (nextPlayerTile && nextPlayerTile.moveable && (!nextWeaponTile || nextWeaponTile.turnable)) {
