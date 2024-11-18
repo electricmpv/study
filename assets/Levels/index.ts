@@ -25,6 +25,11 @@ export interface ITile {
 
 export interface ILevel {
   mapInfo: Array<Array<ITile>>
+  player: IEntity
+  enemies: Array<IEntity>
+  spikes: Array<ISpikes>
+  bursts: Array<IEntity>
+  door: IEntity
 }
 
 const levels: Record<string, ILevel> = {
