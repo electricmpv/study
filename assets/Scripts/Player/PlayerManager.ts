@@ -31,6 +31,12 @@ export class PlayerManager extends EntityManager {
     EventManager.Instance.on(EVENT_ENUM.ATTACK_PLAYER, this.onDead, this)
   }
 
+  onDestroy() {
+    super.onDestroy()
+    EventManager.Instance.off(EVENT_ENUM.PLAYER_CTRL, this.inputHandle)
+    EventManager.Instance.off(EVENT_ENUM.ATTACK_PLAYER, this.onDead)
+  }
+
   update() {
     this.updateXY()
     super.update()
@@ -88,15 +94,19 @@ export class PlayerManager extends EntityManager {
     if (inputDirection === CONTROLLER_ENUM.TOP) {
       this.targetY -= 1
       this.isMoving = true
+      this.showSmoke(DIRECTION_ENUM.TOP)
     } else if (inputDirection === CONTROLLER_ENUM.BOTTOM) {
       this.targetY += 1
       this.isMoving = true
+      this.showSmoke(DIRECTION_ENUM.BOTTOM)
     } else if (inputDirection === CONTROLLER_ENUM.LEFT) {
       this.targetX -= 1
       this.isMoving = true
+      this.showSmoke(DIRECTION_ENUM.LEFT)
     } else if (inputDirection === CONTROLLER_ENUM.RIGHT) {
       this.targetX += 1
       this.isMoving = true
+      this.showSmoke(DIRECTION_ENUM.RIGHT)
     } else if (inputDirection === CONTROLLER_ENUM.TURNLEFT) {
       if (this.direction === DIRECTION_ENUM.TOP) {
         this.direction = DIRECTION_ENUM.LEFT
@@ -124,6 +134,10 @@ export class PlayerManager extends EntityManager {
       this.state = ENTITY_STATE_ENUM.TURNRIGHT
       EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
     }
+  }
+
+  showSmoke(type: DIRECTION_ENUM) {
+    EventManager.Instance.emit(EVENT_ENUM.SHOW_SMOKE, this.x, this.y, type)
   }
 
   willAttack(type: CONTROLLER_ENUM) {

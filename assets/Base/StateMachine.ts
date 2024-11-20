@@ -43,13 +43,21 @@ export abstract class StateMachine extends Component {
     return this._currentState
   }
 
+  /*set currentState(newState) {
+    this._currentState = newState
+    this._currentState.run()
+  }*/
+
   set currentState(newState) {
+    if (!newState) {
+      return
+    }
     this._currentState = newState
     this._currentState.run()
   }
 
   resetTrigger() {
-    for (const [_, value] of this.params) {
+    for (const [, value] of this.params) {
       if (value.type === FSM_PARAMS_TYPE_ENUM.TRIGGER) {
         value.value = false
       }

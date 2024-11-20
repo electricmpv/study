@@ -12,21 +12,28 @@ import { DoorManager } from 'db://assets/Scripts/Door/DoorManager'
 import { IronSkeletonManager } from 'db://assets/Scripts/IronSkeleton/IronSkeletonManager'
 import { BurstManager } from 'db://assets/Scripts/Burst/BurstManager'
 import { SpikesManager } from 'db://assets/Scripts/Spikes/SpikesManager'
+import { SmokeManager } from 'db://assets/Scripts/Smoke/SmokeManager'
 const { ccclass, property } = _decorator
 
 @ccclass('BattleManager')
 export class BattleManager extends Component {
-  level: ILevel
-  stage: Node
+  /*level: ILevel
+  stage: Node*/
+  private level: ILevel
+  private stage: Node = null
+  private smokeLayer: Node = null
 
   onLoad() {
     DateManager.Instance.levelIndex = 1
     EventManager.Instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this)
     EventManager.Instance.on(EVENT_ENUM.PLAYER_MOVE_END, this.checkArrived, this)
+    EventManager.Instance.on(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this)
   }
 
   onDestroy() {
     EventManager.Instance.off(EVENT_ENUM.NEXT_LEVEL, this.nextLevel)
+    EventManager.Instance.off(EVENT_ENUM.PLAYER_MOVE_END, this.checkArrived)
+    EventManager.Instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke)
   }
   start() {
     this.generateStage()
@@ -45,6 +52,7 @@ export class BattleManager extends Component {
       this.generateTileMap()
       //this.generateBursts()
       this.generateSpikes()
+      this.generateSmokeLayer()
       this.generateDoor()
       this.generatePlayer()
       this.generateEnemies()
@@ -178,7 +186,50 @@ export class BattleManager extends Component {
     DateManager.Instance.spikes.push(spikesManager)*/
   }
 
+  /*async generateSmoke(x: number, y: number, direction: DIRECTION_ENUM) {
+    const smoke = createUINode()
+    smoke.setParent(this.stage)
+    const smokeManager = smoke.addComponent(SmokeManager)
+    await smokeManager.init({
+      x,
+      y,
+      direction,
+      state: ENTITY_STATE_ENUM.IDLE,
+      type: ENTITY_TYPE_ENUM.SMOKE,
+    })
+    DateManager.Instance.smokes.push(smokeManager)
+  }*/
+
+  async generateSmoke(x: number, y: number, direction: DIRECTION_ENUM) {
+    const item = DateManager.Instance.smokes.find((smoke: SmokeManager) => smoke.state === ENTITY_STATE_ENUM.DEATH)
+    if (item) {
+      item.x = x
+      item.y = y
+      item.node.setPosition(item.x * TILE_WIDTH - TILE_WIDTH * 1.5, -item.y * TILE_HEIGHT + TILE_HEIGHT * 1.5)
+      item.direction = direction
+      item.state = ENTITY_STATE_ENUM.IDLE
+    } else {
+      const node = createUINode()
+      node.setParent(this.smokeLayer)
+      const smokeManager = node.addComponent(SmokeManager)
+      await smokeManager.init({
+        x,
+        y,
+        direction,
+        state: ENTITY_STATE_ENUM.IDLE,
+        type: ENTITY_TYPE_ENUM.SMOKE,
+      })
+      DateManager.Instance.smokes.push(smokeManager)
+    }
+  }
+
+  async generateSmokeLayer() {
+    this.smokeLayer = createUINode()
+    this.smokeLayer.setParent(this.stage)
+  }
+
   checkArrived() {
+    if (!DateManager.Instance.player || !DateManager.Instance.door) return
     const { x: playerX, y: playerY } = DateManager.Instance.player
     const { x: doorX, y: doorY, state: doorState } = DateManager.Instance.door
     if (playerX === doorX && playerY === doorY && doorState === ENTITY_STATE_ENUM.DEATH) {

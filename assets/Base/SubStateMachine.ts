@@ -15,7 +15,14 @@ export abstract class SubStateMachine {
     return this._currentState
   }
 
+  /*  set currentState(newState) {
+    this._currentState = newState
+    this._currentState.run()
+  }*/
   set currentState(newState) {
+    if (!newState) {
+      return
+    }
     this._currentState = newState
     this._currentState.run()
   }

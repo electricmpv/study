@@ -44,7 +44,7 @@ export default class State {
     this.animationClip.wrapMode = this.wrapMode
   }
   run() {
-    if (this.fsm.animationComponent?.defaultClip?.name === this.animationClip.name) {
+    if (this.fsm.animationComponent.defaultClip?.name === this.animationClip.name) {
       return
     }
     this.fsm.animationComponent.defaultClip = this.animationClip
