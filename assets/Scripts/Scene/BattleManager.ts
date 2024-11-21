@@ -13,6 +13,7 @@ import { IronSkeletonManager } from 'db://assets/Scripts/IronSkeleton/IronSkelet
 import { BurstManager } from 'db://assets/Scripts/Burst/BurstManager'
 import { SpikesManager } from 'db://assets/Scripts/Spikes/SpikesManager'
 import { SmokeManager } from 'db://assets/Scripts/Smoke/SmokeManager'
+import FaderManager from 'db://assets/Runtime/FaderManager'
 const { ccclass, property } = _decorator
 
 @ccclass('BattleManager')
@@ -40,22 +41,27 @@ export class BattleManager extends Component {
     this.initLevel()
   }
 
-  initLevel() {
+  async initLevel() {
     const level = Levels[`level${DateManager.Instance.levelIndex}`]
     if (level) {
+      await FaderManager.Instance.fadeIn()
       this.cleanLevel()
       this.level = level
       DateManager.Instance.mapInfo = this.level.mapInfo
       DateManager.Instance.mapRowCount = this.level.mapInfo.length || 0
       DateManager.Instance.mapColumnCount = this.level.mapInfo[0].length || 0
 
-      this.generateTileMap()
-      //this.generateBursts()
-      this.generateSpikes()
-      this.generateSmokeLayer()
-      this.generateDoor()
-      this.generatePlayer()
-      this.generateEnemies()
+      await Promise.all([
+        this.generateTileMap(),
+        //this.generateBursts(),
+        this.generateSpikes(),
+        this.generateSmokeLayer(),
+        this.generateDoor(),
+        this.generatePlayer(),
+        this.generateEnemies(),
+      ])
+
+      await FaderManager.Instance.fadeOut()
     }
   }
 
@@ -203,6 +209,7 @@ export class BattleManager extends Component {
   async generateSmoke(x: number, y: number, direction: DIRECTION_ENUM) {
     const item = DateManager.Instance.smokes.find((smoke: SmokeManager) => smoke.state === ENTITY_STATE_ENUM.DEATH)
     if (item) {
+      console.log('复用')
       item.x = x
       item.y = y
       item.node.setPosition(item.x * TILE_WIDTH - TILE_WIDTH * 1.5, -item.y * TILE_HEIGHT + TILE_HEIGHT * 1.5)

@@ -9,13 +9,14 @@ import ResourceManager from 'db://assets/Runtime/ResourceManager'
 import { StateMachine } from 'db://assets/Base/StateMachine'
 import { sortSpriteFrame } from 'db://assets/Utils'
 
-const ANIMATION_SPEED = 1 / 8
+export const ANIMATION_SPEED = 1 / 8
 export default class State {
   private animationClip: AnimationClip
   constructor(
     private fsm: StateMachine,
     private path: string,
     private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal,
+    private speed: number = ANIMATION_SPEED,
   ) {
     this.init()
   }
@@ -31,7 +32,7 @@ export default class State {
 
     track.path = new animation.TrackPath().toComponent(Sprite).toProperty('spriteFrame')
     const frames: Array<[number, SpriteFrame]> = sortSpriteFrame(spriteFrames).map((item, index) => [
-      ANIMATION_SPEED * index,
+      this.speed * index,
       item,
     ])
 
