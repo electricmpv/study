@@ -28,10 +28,10 @@ export class SpikesManager extends Component {
   y: number = 0
 
   fsm: StateMachine
+  type: ENTITY_TYPE_ENUM
 
   private _count: number
   private _totalCount: number
-  private type: ENTITY_TYPE_ENUM
 
   get count() {
     return this._count

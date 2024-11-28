@@ -81,8 +81,11 @@ export class PlayerManager extends EntityManager {
     }
     const id = this.willAttack(inputDirection)
     if (id) {
+      EventManager.Instance.emit(EVENT_ENUM.RECORD_STEP)
+      this.state = ENTITY_STATE_ENUM.ATTACK
       EventManager.Instance.emit(EVENT_ENUM.ATTACK_ENEMY, id)
       EventManager.Instance.emit(EVENT_ENUM.DOOR_OPEN)
+      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END)
       return
     }
     if (this.willBlock(inputDirection)) {
@@ -123,6 +126,7 @@ export class PlayerManager extends EntityManager {
   }
 
   move(inputDirection: CONTROLLER_ENUM) {
+    EventManager.Instance.emit(EVENT_ENUM.RECORD_STEP)
     console.log(DateManager.Instance.tileInfo)
 
     if (inputDirection === CONTROLLER_ENUM.TOP) {

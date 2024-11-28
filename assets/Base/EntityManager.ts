@@ -24,10 +24,10 @@ export class EntityManager extends Component {
   y: number = 0
 
   fsm: StateMachine
+  type: ENTITY_TYPE_ENUM
 
   private _direction: DIRECTION_ENUM
   private _state: ENTITY_STATE_ENUM
-  private type: ENTITY_TYPE_ENUM
 
   get direction() {
     return this._direction

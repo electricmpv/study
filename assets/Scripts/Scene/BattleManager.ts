@@ -2,7 +2,7 @@ import { _decorator, Component, Node } from 'cc'
 import { TileMapManager } from 'db://assets/Scripts/Tile/TileMapManager'
 import { createUINode } from 'db://assets/Utils'
 import Levels, { ILevel } from 'db://assets/Levels'
-import DateManager from 'db://assets/Runtime/DateManager'
+import DateManager, { IRecord } from 'db://assets/Runtime/DateManager'
 import { TILE_HEIGHT, TILE_WIDTH } from 'db://assets/Scripts/Tile/TileManager'
 import EventManager from 'db://assets/Runtime/EventManager'
 import { DIRECTION_ENUM, ENTITY_STATE_ENUM, ENTITY_TYPE_ENUM, EVENT_ENUM } from 'db://assets/Enums'
@@ -15,6 +15,7 @@ import { SpikesManager } from 'db://assets/Scripts/Spikes/SpikesManager'
 import { SmokeManager } from 'db://assets/Scripts/Smoke/SmokeManager'
 import FaderManager from 'db://assets/Runtime/FaderManager'
 import { ShakeManager } from 'db://assets/Scripts/UI/ShakeManager'
+
 const { ccclass, property } = _decorator
 
 @ccclass('BattleManager')
@@ -30,12 +31,16 @@ export class BattleManager extends Component {
     EventManager.Instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this)
     EventManager.Instance.on(EVENT_ENUM.PLAYER_MOVE_END, this.checkArrived, this)
     EventManager.Instance.on(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this)
+    EventManager.Instance.on(EVENT_ENUM.RECORD_STEP, this.record, this)
+    EventManager.Instance.on(EVENT_ENUM.REVOKE_STEP, this.revoke, this)
   }
 
   onDestroy() {
     EventManager.Instance.off(EVENT_ENUM.NEXT_LEVEL, this.nextLevel)
     EventManager.Instance.off(EVENT_ENUM.PLAYER_MOVE_END, this.checkArrived)
     EventManager.Instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke)
+    EventManager.Instance.off(EVENT_ENUM.RECORD_STEP, this.record)
+    EventManager.Instance.off(EVENT_ENUM.REVOKE_STEP, this.revoke)
   }
   start() {
     this.generateStage()
@@ -251,5 +256,76 @@ export class BattleManager extends Component {
     const disY = (TILE_HEIGHT * mapColumnCount) / 2 + 80
     this.stage.getComponent(ShakeManager).shop()
     this.stage.setPosition(-disX, disY)
+  }
+
+  record() {
+    const item: IRecord = {
+      player: {
+        x: DateManager.Instance.player.x,
+        y: DateManager.Instance.player.y,
+        direction: DateManager.Instance.player.direction,
+        state:
+          DateManager.Instance.player.state === ENTITY_STATE_ENUM.IDLE ||
+          DateManager.Instance.player.state === ENTITY_STATE_ENUM.DEATH ||
+          DateManager.Instance.player.state === ENTITY_STATE_ENUM.AIRDEATH
+            ? DateManager.Instance.player.state
+            : ENTITY_STATE_ENUM.IDLE,
+        type: DateManager.Instance.player.type,
+      },
+
+      door: {
+        x: DateManager.Instance.door.x,
+        y: DateManager.Instance.door.y,
+        direction: DateManager.Instance.door.direction,
+        state: DateManager.Instance.door.state,
+        type: DateManager.Instance.door.type,
+      },
+      enemies: DateManager.Instance.enemies.map(({ x, y, direction, state, type }) => ({
+        x,
+        y,
+        direction,
+        state,
+        type,
+      })),
+      bursts: DateManager.Instance.bursts.map(({ x, y, direction, state, type }) => ({ x, y, direction, state, type })),
+      spikes: DateManager.Instance.spikes.map(({ x, y, count, type }) => ({ x, y, count, type })),
+    }
+    DateManager.Instance.records.push(item)
+  }
+
+  revoke() {
+    const item = DateManager.Instance.records.pop()
+    if (!item) return
+    if (item) {
+      DateManager.Instance.player.x = DateManager.Instance.player.targetX = item.player.x
+      DateManager.Instance.player.y = DateManager.Instance.player.targetY = item.player.y
+      DateManager.Instance.player.direction = item.player.direction
+      DateManager.Instance.player.state = item.player.state
+
+      DateManager.Instance.door.x = item.door.x
+      DateManager.Instance.door.y = item.door.y
+      DateManager.Instance.door.direction = item.door.direction
+      DateManager.Instance.door.state = item.door.state
+
+      for (let i = 0; i < DateManager.Instance.enemies.length; i++) {
+        DateManager.Instance.enemies[i].x = item.enemies[i].x
+        DateManager.Instance.enemies[i].y = item.enemies[i].y
+        DateManager.Instance.enemies[i].direction = item.enemies[i].direction
+        DateManager.Instance.enemies[i].state = item.enemies[i].state
+      }
+
+      for (let i = 0; i < DateManager.Instance.bursts.length; i++) {
+        DateManager.Instance.bursts[i].x = item.bursts[i].x
+        DateManager.Instance.bursts[i].y = item.bursts[i].y
+        DateManager.Instance.bursts[i].direction = item.bursts[i].direction
+        DateManager.Instance.bursts[i].state = item.bursts[i].state
+      }
+
+      for (let i = 0; i < DateManager.Instance.spikes.length; i++) {
+        DateManager.Instance.spikes[i].x = item.spikes[i].x
+        DateManager.Instance.spikes[i].y = item.spikes[i].y
+        DateManager.Instance.spikes[i].count = item.spikes[i].count
+      }
+    }
   }
 }
