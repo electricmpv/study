@@ -14,6 +14,7 @@ import { BurstManager } from 'db://assets/Scripts/Burst/BurstManager'
 import { SpikesManager } from 'db://assets/Scripts/Spikes/SpikesManager'
 import { SmokeManager } from 'db://assets/Scripts/Smoke/SmokeManager'
 import FaderManager from 'db://assets/Runtime/FaderManager'
+import { ShakeManager } from 'db://assets/Scripts/UI/ShakeManager'
 const { ccclass, property } = _decorator
 
 @ccclass('BattleManager')
@@ -78,6 +79,7 @@ export class BattleManager extends Component {
   generateStage() {
     this.stage = createUINode()
     this.stage.setParent(this.node)
+    this.stage.addComponent(ShakeManager)
   }
 
   async generateTileMap() {
@@ -247,6 +249,7 @@ export class BattleManager extends Component {
     const { mapRowCount, mapColumnCount } = DateManager.Instance
     const disX = (TILE_WIDTH * mapRowCount) / 2
     const disY = (TILE_HEIGHT * mapColumnCount) / 2 + 80
+    this.stage.getComponent(ShakeManager).shop()
     this.stage.setPosition(-disX, disY)
   }
 }

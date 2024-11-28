@@ -1,6 +1,6 @@
 import { _decorator, UITransform } from 'cc'
 
-import { ENTITY_STATE_ENUM, EVENT_ENUM } from 'db://assets/Enums'
+import { ENTITY_STATE_ENUM, EVENT_ENUM, SHAKE_TYPE_ENUM } from 'db://assets/Enums'
 
 import { EntityManager } from 'db://assets/Base/EntityManager'
 import DateManager from 'db://assets/Runtime/DateManager'
@@ -43,6 +43,7 @@ export class BurstManager extends EntityManager {
       this.state = ENTITY_STATE_ENUM.ATTACK
     } else if (this.state === ENTITY_STATE_ENUM.ATTACK) {
       this.state = ENTITY_STATE_ENUM.DEATH
+      EventManager.Instance.emit(EVENT_ENUM.SCREEN_SHAKE, SHAKE_TYPE_ENUM.BOTTOM)
       if (this.x === playerX && this.y === playerY) {
         EventManager.Instance.emit(EVENT_ENUM.ATTACK_PLAYER, ENTITY_STATE_ENUM.AIRDEATH)
       }
