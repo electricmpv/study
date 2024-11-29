@@ -99,4 +99,10 @@ export class DrawManager extends Component {
       this.fadeResolver = resolve
     })
   }
+  mask() {
+    this.setAlpha(1)
+    return new Promise(resolve => {
+      setTimeout(resolve, DEFAULT_DURATION)
+    })
+  }
 }

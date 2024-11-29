@@ -33,4 +33,8 @@ export default class FaderManager extends Singleton {
   fadeOut(duration: number = DEFAULT_DURATION) {
     return this.fader.fadeOut(duration)
   }
+
+  mask() {
+    return this.fader.mask()
+  }
 }

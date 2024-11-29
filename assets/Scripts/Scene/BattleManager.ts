@@ -1,11 +1,11 @@
-import { _decorator, Component, Node } from 'cc'
+import { _decorator, Component, Node, director } from 'cc'
 import { TileMapManager } from 'db://assets/Scripts/Tile/TileMapManager'
 import { createUINode } from 'db://assets/Utils'
 import Levels, { ILevel } from 'db://assets/Levels'
 import DateManager, { IRecord } from 'db://assets/Runtime/DateManager'
 import { TILE_HEIGHT, TILE_WIDTH } from 'db://assets/Scripts/Tile/TileManager'
 import EventManager from 'db://assets/Runtime/EventManager'
-import { DIRECTION_ENUM, ENTITY_STATE_ENUM, ENTITY_TYPE_ENUM, EVENT_ENUM } from 'db://assets/Enums'
+import { DIRECTION_ENUM, ENTITY_STATE_ENUM, ENTITY_TYPE_ENUM, EVENT_ENUM, SCENE_ENUM } from 'db://assets/Enums'
 import { PlayerManager } from 'db://assets/Scripts/Player/PlayerManager'
 import { WoodenSkeletonManager } from 'db://assets/Scripts/WoodenSkeleton/WoodenSkeletonManager'
 import { DoorManager } from 'db://assets/Scripts/Door/DoorManager'
@@ -25,6 +25,7 @@ export class BattleManager extends Component {
   private level: ILevel
   private stage: Node = null
   private smokeLayer: Node = null
+  private inited = false
 
   onLoad() {
     DateManager.Instance.levelIndex = 1
@@ -33,6 +34,8 @@ export class BattleManager extends Component {
     EventManager.Instance.on(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this)
     EventManager.Instance.on(EVENT_ENUM.RECORD_STEP, this.record, this)
     EventManager.Instance.on(EVENT_ENUM.REVOKE_STEP, this.revoke, this)
+    EventManager.Instance.on(EVENT_ENUM.RESTART_LEVEL, this.initLevel, this)
+    EventManager.Instance.on(EVENT_ENUM.OUT_BATTLE, this.outBattle, this)
   }
 
   onDestroy() {
@@ -41,6 +44,8 @@ export class BattleManager extends Component {
     EventManager.Instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke)
     EventManager.Instance.off(EVENT_ENUM.RECORD_STEP, this.record)
     EventManager.Instance.off(EVENT_ENUM.REVOKE_STEP, this.revoke)
+    EventManager.Instance.off(EVENT_ENUM.RESTART_LEVEL, this.initLevel)
+    EventManager.Instance.off(EVENT_ENUM.OUT_BATTLE, this.outBattle)
   }
   start() {
     this.generateStage()
@@ -50,7 +55,12 @@ export class BattleManager extends Component {
   async initLevel() {
     const level = Levels[`level${DateManager.Instance.levelIndex}`]
     if (level) {
-      await FaderManager.Instance.fadeIn()
+      if (this.inited) {
+        await FaderManager.Instance.fadeIn()
+      } else {
+        await FaderManager.Instance.mask()
+      }
+
       this.cleanLevel()
       this.level = level
       DateManager.Instance.mapInfo = this.level.mapInfo
@@ -59,7 +69,7 @@ export class BattleManager extends Component {
 
       await Promise.all([
         this.generateTileMap(),
-        //this.generateBursts(),
+        this.generateBursts(),
         this.generateSpikes(),
         this.generateSmokeLayer(),
         this.generateDoor(),
@@ -68,7 +78,15 @@ export class BattleManager extends Component {
       ])
 
       await FaderManager.Instance.fadeOut()
+      this.inited = true
+    } else {
+      this.outBattle()
     }
+  }
+
+  async outBattle() {
+    await FaderManager.Instance.fadeIn()
+    director.loadScene(SCENE_ENUM.Start)
   }
 
   nextLevel() {
@@ -198,20 +216,6 @@ export class BattleManager extends Component {
     })
     DateManager.Instance.spikes.push(spikesManager)*/
   }
-
-  /*async generateSmoke(x: number, y: number, direction: DIRECTION_ENUM) {
-    const smoke = createUINode()
-    smoke.setParent(this.stage)
-    const smokeManager = smoke.addComponent(SmokeManager)
-    await smokeManager.init({
-      x,
-      y,
-      direction,
-      state: ENTITY_STATE_ENUM.IDLE,
-      type: ENTITY_TYPE_ENUM.SMOKE,
-    })
-    DateManager.Instance.smokes.push(smokeManager)
-  }*/
 
   async generateSmoke(x: number, y: number, direction: DIRECTION_ENUM) {
     const item = DateManager.Instance.smokes.find((smoke: SmokeManager) => smoke.state === ENTITY_STATE_ENUM.DEATH)
